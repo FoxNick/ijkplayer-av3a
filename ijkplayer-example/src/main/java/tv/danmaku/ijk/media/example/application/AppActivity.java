@@ -19,20 +19,27 @@ package tv.danmaku.ijk.media.example.application;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.activities.RecentMediaActivity;
 import tv.danmaku.ijk.media.example.activities.SampleMediaActivity;
 import tv.danmaku.ijk.media.example.activities.SettingsActivity;
+import tv.danmaku.ijk.media.example.activities.VideoActivity;
 
 @SuppressLint("Registered")
 public class AppActivity extends AppCompatActivity {
@@ -102,6 +109,8 @@ public class AppActivity extends AppCompatActivity {
             RecentMediaActivity.intentTo(this);
         } else if (id == R.id.action_sample) {
             SampleMediaActivity.intentTo(this);
+        } else if (id == R.id.action_load_url) {
+            openDialog();
         }
 
         return super.onOptionsItemSelected(item);
@@ -114,5 +123,35 @@ public class AppActivity extends AppCompatActivity {
             return show;
 
         return true;
+    }
+
+    private void openDialog() {
+        AppActivity activity = this;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("输入链接");
+
+        // 设置对话框的布局
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        // 设置确认按钮
+        builder.setPositiveButton("确认", (dialog, which) -> {
+            String url = input.getText().toString();
+            String name = "CUSTOM URL";
+            VideoActivity.intentTo(activity, url, name);
+        });
+
+        // 延迟请求输入框获取焦点
+        input.postDelayed(() -> {
+            input.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+        }, 150);
+
+        // 设置取消按钮
+        builder.setNegativeButton("取消", (dialog, which) -> dialog.cancel());
+
+        builder.show();
     }
 }

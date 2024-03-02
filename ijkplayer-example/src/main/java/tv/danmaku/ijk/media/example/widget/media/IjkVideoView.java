@@ -47,14 +47,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import tv.danmaku.ijk.media.exo.IjkExoMediaPlayer;
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkTimedText;
+import tv.danmaku.ijk.media.player.MediaPlayerProxy;
 import tv.danmaku.ijk.media.player.TextureMediaPlayer;
 import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.IMediaFormat;
@@ -419,7 +418,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
         public void onPrepared(IMediaPlayer mp) {
             mPrepareEndTime = System.currentTimeMillis();
-            mHudViewHolder.updateLoadCost(mPrepareEndTime - mPrepareStartTime);
+            if (mHudViewHolder != null) {
+                mHudViewHolder.updateLoadCost(mPrepareEndTime - mPrepareStartTime);
+            }
             mCurrentState = STATE_PREPARED;
 
             // Get the capabilities of the player for this stream
@@ -601,7 +602,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         @Override
         public void onSeekComplete(IMediaPlayer mp) {
             mSeekEndTime = System.currentTimeMillis();
-            mHudViewHolder.updateSeekCost(mSeekEndTime - mSeekStartTime);
+            if (mHudViewHolder != null) {
+                mHudViewHolder.updateSeekCost(mSeekEndTime - mSeekStartTime);
+            }
         }
     };
 
@@ -1043,7 +1046,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 IjkMediaPlayer ijkMediaPlayer = null;
                 if (mUri != null) {
                     ijkMediaPlayer = new IjkMediaPlayer();
-                    ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
+                    // TODO 设置日志级别
+                    ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEFAULT);
 
                     if (mManifestString != null) {
                         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "iformat", "ijklas");
@@ -1052,6 +1056,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     }
                     if (mSettings.getUsingMediaCodec()) {
                         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-hevc", 1);
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-all-videos", 1);
                         if (mSettings.getUsingMediaCodecAutoRotate()) {
                             ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1);
                         } else {
@@ -1180,19 +1186,21 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 } else if (mediaFormat instanceof IjkMediaFormat) {
                     switch (trackType) {
                         case ITrackInfo.MEDIA_TRACK_TYPE_VIDEO:
-                            builder.appendRow2(R.string.mi_codec, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_LONG_NAME_UI));
+                            // builder.appendRow2(R.string.mi_codec, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_LONG_NAME_UI));
+                            builder.appendRow2(R.string.mi_codec, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_NAME_UI));
                             builder.appendRow2(R.string.mi_profile_level, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_PROFILE_LEVEL_UI));
                             builder.appendRow2(R.string.mi_pixel_format, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_PIXEL_FORMAT_UI));
                             builder.appendRow2(R.string.mi_resolution, mediaFormat.getString(IjkMediaFormat.KEY_IJK_RESOLUTION_UI));
                             builder.appendRow2(R.string.mi_frame_rate, mediaFormat.getString(IjkMediaFormat.KEY_IJK_FRAME_RATE_UI));
-                            builder.appendRow2(R.string.mi_bit_rate, mediaFormat.getString(IjkMediaFormat.KEY_IJK_BIT_RATE_UI));
+                            builder.appendRow2(R.string.mi_bit_rate, getBitrateString(mediaFormat));
                             break;
                         case ITrackInfo.MEDIA_TRACK_TYPE_AUDIO:
-                            builder.appendRow2(R.string.mi_codec, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_LONG_NAME_UI));
-                            builder.appendRow2(R.string.mi_profile_level, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_PROFILE_LEVEL_UI));
+                            // builder.appendRow2(R.string.mi_codec, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_LONG_NAME_UI));
+                            builder.appendRow2(R.string.mi_codec, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_NAME_UI));
+                            // builder.appendRow2(R.string.mi_profile_level, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_PROFILE_LEVEL_UI));
                             builder.appendRow2(R.string.mi_sample_rate, mediaFormat.getString(IjkMediaFormat.KEY_IJK_SAMPLE_RATE_UI));
                             builder.appendRow2(R.string.mi_channels, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CHANNEL_UI));
-                            builder.appendRow2(R.string.mi_bit_rate, mediaFormat.getString(IjkMediaFormat.KEY_IJK_BIT_RATE_UI));
+                            builder.appendRow2(R.string.mi_bit_rate, getBitrateString(mediaFormat));
                             break;
                         default:
                             break;
@@ -1205,6 +1213,30 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         adBuilder.setTitle(R.string.media_information);
         adBuilder.setNegativeButton(R.string.close, null);
         adBuilder.show();
+    }
+
+    private String getBitrateString(IMediaFormat mediaFormat) {
+        String bitRate = mediaFormat.getString(IjkMediaFormat.KEY_IJK_BIT_RATE_UI);
+        // 如果获取不到码率 直接取瞬时码率
+        if ("N/A".equals(bitRate) || "0".equals(bitRate)) {
+            long bitRateNumber = 0;
+            if (mMediaPlayer instanceof IjkMediaPlayer) {
+                bitRateNumber = ((IjkMediaPlayer) mMediaPlayer).getBitRate();
+                if (bitRateNumber == 0) {
+                    bitRateNumber = ((IjkMediaPlayer) mMediaPlayer).getTcpSpeed();
+                }
+            } else if (mMediaPlayer instanceof MediaPlayerProxy) {
+                MediaPlayerProxy proxy = (MediaPlayerProxy) mMediaPlayer;
+                IMediaPlayer internal = proxy.getInternalMediaPlayer();
+                if (internal != null && internal instanceof IjkMediaPlayer)
+                    bitRateNumber = ((IjkMediaPlayer) internal).getBitRate();
+                if (bitRateNumber == 0) {
+                    bitRateNumber = ((IjkMediaPlayer) internal).getTcpSpeed() * 8;
+                }
+            }
+            bitRate = String.format(Locale.US, "%.0f kb/s", bitRateNumber / 1000f);
+        }
+        return bitRate;
     }
 
     private String buildResolution(int width, int height, int sarNum, int sarDen) {

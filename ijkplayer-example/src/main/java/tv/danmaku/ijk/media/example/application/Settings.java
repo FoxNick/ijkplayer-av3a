@@ -37,6 +37,11 @@ public class Settings {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
     }
 
+    public boolean getEnableHudView() {
+        String key = mAppContext.getString(R.string.pref_key_enable_hud_view);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
     public boolean getEnableBackgroundPlay() {
         String key = mAppContext.getString(R.string.pref_key_enable_background_play);
         return mSharedPreferences.getBoolean(key, false);
@@ -54,12 +59,12 @@ public class Settings {
 
     public boolean getUsingMediaCodec() {
         String key = mAppContext.getString(R.string.pref_key_using_media_codec);
-        return mSharedPreferences.getBoolean(key, false);
+        return mSharedPreferences.getBoolean(key, true);
     }
 
     public boolean getUsingMediaCodecAutoRotate() {
         String key = mAppContext.getString(R.string.pref_key_using_media_codec_auto_rotate);
-        return mSharedPreferences.getBoolean(key, false);
+        return mSharedPreferences.getBoolean(key, true);
     }
 
     public boolean getMediaCodecHandleResolutionChange() {

@@ -34,7 +34,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
@@ -82,6 +84,19 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 
         mSettings = new Settings(this);
 
+        // 全屏布局
+        Window window = getWindow();
+        window.getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        // 沉浸状态栏(给任务栏上透明的色)(Android 10 上，只需要将系统栏颜色设为完全透明即可:)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }
+
         // handle arguments
         mVideoPath = getIntent().getStringExtra("videoPath");
 
@@ -127,7 +142,6 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mMediaController.setSupportActionBar(actionBar);
 
         mToastTextView = (TextView) findViewById(R.id.toast_text_view);
-        mHudView = (TableLayout) findViewById(R.id.hud_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
 
@@ -139,7 +153,13 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 
         mVideoView = (IjkVideoView) findViewById(R.id.video_view);
         mVideoView.setMediaController(mMediaController);
-        mVideoView.setHudView(mHudView);
+        mHudView = (TableLayout) findViewById(R.id.hud_view);
+        if (mSettings.getEnableHudView()) {
+            mVideoView.setHudView(mHudView);
+        } else {
+            // hide hud view
+            mHudView.setVisibility(View.GONE);
+        }
         // prefer mVideoPath
         if (mVideoPath != null)
             mVideoView.setVideoPath(mVideoPath);
@@ -189,13 +209,16 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             mToastTextView.setText(aspectRatioText);
             mMediaController.showOnce(mToastTextView);
             return true;
-        } else if (id == R.id.action_toggle_player) {
+        } else if (id == R.id.action_close_video) {
+            // 返回
+            onBackPressed();
+        } /*else if (id == R.id.action_toggle_player) {
             int player = mVideoView.togglePlayer();
             String playerText = IjkVideoView.getPlayerText(this, player);
             mToastTextView.setText(playerText);
             mMediaController.showOnce(mToastTextView);
             return true;
-        } else if (id == R.id.action_toggle_render) {
+        } */else if (id == R.id.action_toggle_render) {
             int render = mVideoView.toggleRender();
             String renderText = IjkVideoView.getRenderText(this, render);
             mToastTextView.setText(renderText);

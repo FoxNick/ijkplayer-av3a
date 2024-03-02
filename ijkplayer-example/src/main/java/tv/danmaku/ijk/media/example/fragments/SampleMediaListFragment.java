@@ -129,7 +129,7 @@ public class SampleMediaListFragment extends Fragment {
                 "    ]\n" +
                 "}";
 
-        mAdapter.addItem(manifest_string, "las test");
+        // mAdapter.addItem(manifest_string, "las test");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8", "bipbop basic master playlist");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/prog_index.m3u8", "bipbop basic 400x300 @ 232 kbps");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8", "bipbop basic 640x480 @ 650 kbps");
@@ -143,7 +143,7 @@ public class SampleMediaListFragment extends Fragment {
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear4/prog_index.m3u8", "bipbop advanced 1289x720 @ 1 Mbps");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear5/prog_index.m3u8", "bipbop advanced 1920x1080 @ 2 Mbps");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear0/prog_index.m3u8", "bipbop advanced 22.050Hz stereo @ 40 kbps");
-        mAdapter.addItem("http://159.75.85.63:8654/xx8k50fps.php", "CCTV 8K");
+        // mAdapter.addItem("http://159.75.85.63:8654/xx8k50fps.php", "CCTV 8K");
     }
 
     final class SampleMediaItem {

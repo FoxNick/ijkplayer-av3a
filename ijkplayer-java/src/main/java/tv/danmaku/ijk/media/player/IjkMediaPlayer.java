@@ -984,6 +984,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
             switch (msg.what) {
             case MEDIA_PREPARED:
+                player.stayAwake(true);
                 player.notifyOnPrepared();
                 return;
 

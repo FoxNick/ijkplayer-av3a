@@ -129,6 +129,11 @@ public class IjkMediaMeta {
     public static final int FF_PROFILE_H264_HIGH_444_INTRA = (244|FF_PROFILE_H264_INTRA);
     public static final int FF_PROFILE_H264_CAVLC_444 = 44;
 
+    // 补充HEVC的定义
+    public static final int FF_PROFILE_HEVC_MAIN = 1;
+    public static final int FF_PROFILE_HEVC_MAIN_10 = 2;
+
+
     public Bundle mMediaMeta;
 
     public String mFormat;
