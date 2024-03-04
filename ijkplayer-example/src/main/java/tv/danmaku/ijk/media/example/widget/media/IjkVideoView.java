@@ -1223,7 +1223,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             if (mMediaPlayer instanceof IjkMediaPlayer) {
                 bitRateNumber = ((IjkMediaPlayer) mMediaPlayer).getBitRate();
                 if (bitRateNumber == 0) {
-                    bitRateNumber = ((IjkMediaPlayer) mMediaPlayer).getTcpSpeed();
+                    bitRateNumber = ((IjkMediaPlayer) mMediaPlayer).getTcpSpeed() * 8;
                 }
             } else if (mMediaPlayer instanceof MediaPlayerProxy) {
                 MediaPlayerProxy proxy = (MediaPlayerProxy) mMediaPlayer;
