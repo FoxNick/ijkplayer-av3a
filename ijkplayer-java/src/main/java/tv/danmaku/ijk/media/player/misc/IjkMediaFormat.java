@@ -272,9 +272,9 @@ public class IjkMediaFormat implements IMediaFormat {
                     } else if (channelLayout == IjkMediaMeta.AV_CH_LAYOUT_SURROUND) {
                         return "surround";
                     } else if (channelLayout == IjkMediaMeta.AV_CH_LAYOUT_5POINT1) {
-                        return "5.1 surround";
-                    } else if (channelLayout == IjkMediaMeta.AV_CH_LAYOUT_7POINT1) {
-                        return "7.1 surround";
+                        return "5.1";
+                    } else if (channelLayout == IjkMediaMeta.AV_CH_AV3A_LAYOUT_5POINT1POINT4) {
+                        return "5.1.4";
                     } else {
                         return String.format(Locale.US, "%x", channelLayout);
                     }
